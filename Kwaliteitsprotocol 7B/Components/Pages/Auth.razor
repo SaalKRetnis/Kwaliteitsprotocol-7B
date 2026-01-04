@@ -3,14 +3,20 @@
 @inject NavigationManager Navigation
 
 <div class="auth">
-    <section class="auth-box">
+    <section class="auth-box card">
         <h1>Kwaliteitsprotocol 7B – Toegang vereist</h1>
         <p>Voer uw persoonlijke toegangscode in om de module te openen.</p>
-
+        
         <input class="auth-input" @bind="Input" />
 
-        <p class="notice @NoticeClass">Ongeldige toegangscode. Probeer opnieuw.</p>
-        <p class="glitch @GlitchClass">CLASSIFICATIE BEVESTIGD – MELK‑Δ17</p>
+        @if (InputIsValid is true)
+        {
+            <p class="glitch">CLASSIFICATIE BEVESTIGD – MELK‑Δ17</p>
+        }
+        else if (InputIsValid is false)
+        {
+            <p class="notice">Ongeldige toegangscode. Probeer opnieuw.</p>
+        }
 
         <button class="auth-button" @onclick="Verify">Verifiëren</button>
     </section>
@@ -20,9 +26,6 @@
     bool? InputIsValid;
 
     public string? Input { get; set; }
-
-    public string? GlitchClass => InputIsValid is true ? "active" : null;
-    public string? NoticeClass => InputIsValid is false ? "active" : null;
 
     public async Task Verify()
     {

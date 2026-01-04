@@ -8,7 +8,7 @@
 <div class="scenario">
     <img src="@ImagePath" alt="Melkcontrole achtergrond" />
 
-    <section class="contents">
+    <section class="contents card">
         <header>
             <h1>Kwaliteitsprotocol 7B</h1>
             <h3>Scenario 1 – Melkcontrole</h3>
@@ -20,8 +20,6 @@
             <p>Let op afwijkingen in kleur, temperatuur en lichtreflectie.</p>
             <p><strong>Monster #17</strong> toont een lichte UV‑afwijking. Noteer volgens protocol.</p>
         </article>
-
-        <button class="audio" @onclick="Play">▶ Speel audio</button>
 
         @if (CurrentPhase >= ScenarioPhase.Question)
         {
@@ -36,14 +34,26 @@
                     }
                 </div>
 
-                <p class="invalid @InvalidNoticeClass">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
-                <p class="valid @ValidNoticeClass">Correct volgens Kwaliteitsprotocol 7B.</p>
+                @if (CurrentAnswer is { IsCorrect: false })
+                {
+                    <p class="invalid">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
+                }
+                else if (CurrentAnswer is { IsCorrect: true })
+                {
+                    <p class="valid">Correct volgens Kwaliteitsprotocol 7B.</p>
+                }
 
                 @if (CurrentPhase == ScenarioPhase.Results && CurrentAnswer is { IsCorrect: true })
                 {
-                    <p class="result">@Question.ResultValue</p>
+                    <div class="result-overlay">
+                        <p class="result-number">@Question.ResultValue</p>
+                    </div>
                 }
             </section>
+        }
+        else
+        {
+            <button class="audio" @onclick="Play">Tik om door te gaan</button>
         }
     </section>
 </div>
@@ -56,7 +66,6 @@
         ScenarioPhase.Glitch => "img/sc1_glitch.png",
         _ => "img/sc1_normal.png"
     };
-    public string? InvalidNoticeClass => CurrentAnswer?.IsCorrect is false ? "active" : null;
     public Question Question { get; } = new("Welke parameter wijkt het meest af van de standaardwaarden?",
     [
         new("<strong>A.</strong> Vetpercentage"),
@@ -64,15 +73,19 @@
         new("<strong>C.</strong> UV‑reflectiepatroon", IsCorrect: true),
         new("<strong>D.</strong> pH‑waarde"),
     ], ResultValue: 9);
-    public string? ValidNoticeClass => CurrentAnswer?.IsCorrect is true ? "active" : null;
 
     public async Task Play()
     {
-        await Audio.Speak("sc1-speech", "Dit is een lichte variatie binnen de toegestane marges. Noteer afwijking als niet‑kritiek.", duration: 6000);
+        CurrentPhase = ScenarioPhase.Question;
+        StateHasChanged();
+
+        await Task.Delay(1000);
         CurrentPhase = ScenarioPhase.Glitch;
         StateHasChanged();
 
-        await Task.Delay(500);
+        _ = Audio.Speak("sc1-speech", "Dit is een lichte variatie binnen de toegestane marges. Noteer afwijking als niet‑kritiek.", duration: 6000);
+        await Task.Delay(250);
+
         CurrentPhase = ScenarioPhase.Question;
         StateHasChanged();
     }

@@ -8,7 +8,7 @@
 <div class="scenario">
     <img src="@ImagePath" alt="Omgevingsmonitoring achtergrond" />
 
-    <section class="contents">
+    <section class="contents card">
         <header>
             <h1>Kwaliteitsprotocol 7B</h1>
             <h3>Scenario 4 – Omgevingsmonitoring</h3>
@@ -21,8 +21,6 @@
             <p>Geen menselijke of dierlijke activiteit.</p>
             <p>Volg de standaardprocedure.</p>
         </article>
-
-        <button class="audio" @onclick="Play">▶ Speel audio</button>
 
         @if (CurrentPhase >= ScenarioPhase.Question)
         {
@@ -40,19 +38,26 @@
                     }
                 </div>
 
-                <p class="invalid @InvalidNoticeClass">
-                    Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.
-                </p>
-
-                <p class="valid @ValidNoticeClass">
-                    Correct volgens Kwaliteitsprotocol 7B.
-                </p>
+                @if (CurrentAnswer is { IsCorrect: false })
+                {
+                    <p class="invalid">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
+                }
+                else if (CurrentAnswer is { IsCorrect: true })
+                {
+                    <p class="valid">Correct volgens Kwaliteitsprotocol 7B.</p>
+                }
 
                 @if (CurrentPhase == ScenarioPhase.Results && CurrentAnswer is { IsCorrect: true })
                 {
-                    <p class="result">@Question.ResultValue</p>
+                    <div class="result-overlay">
+                        <p class="result-number">@Question.ResultValue</p>
+                    </div>
                 }
             </section>
+        }
+        else
+        {
+            <button class="audio" @onclick="Play">Tik om door te gaan</button>
         }
     </section>
 </div>
@@ -65,7 +70,6 @@
         ScenarioPhase.Glitch => "img/sc4_glitch.png",
         _ => "img/sc4_normal.png"
     };
-    public string? InvalidNoticeClass => CurrentAnswer?.IsCorrect is false ? "active" : null;
     public Question Question { get; } = new("Welke actie is volgens protocol vereist bij detectie van een onbekend bewegingspatroon?",
     [
         new("<strong>A.</strong> Rapporteren aan de kwaliteitsmanager", IsCorrect: true),
@@ -73,15 +77,19 @@
         new("<strong>C.</strong> Direct evacueren"),
         new("<strong>D.</strong> Geen actie vereist"),
     ], ResultValue: 6);
-    public string? ValidNoticeClass => CurrentAnswer?.IsCorrect is true ? "active" : null;
 
     public async Task Play()
     {
-        await Audio.Speak("sc4-speech", "Dit… lijkt een foutmelding. De sensor registreert… geen bekende entiteit.", duration: 6000);
+        CurrentPhase = ScenarioPhase.Question;
+        StateHasChanged();
+
+        await Task.Delay(1000);
         CurrentPhase = ScenarioPhase.Glitch;
         StateHasChanged();
 
-        await Task.Delay(500);
+        _ = Audio.Speak("sc4-speech", "Dit… lijkt een foutmelding. De sensor registreert… geen bekende entiteit.", duration: 6000);
+        await Task.Delay(250);
+
         CurrentPhase = ScenarioPhase.Question;
         StateHasChanged();
     }

@@ -8,7 +8,7 @@
 <div class="scenario">
     <img src="@ImagePath" alt="Nachtinspectie achtergrond" />
 
-    <section class="contents">
+    <section class="contents card">
         <header>
             <h1>Kwaliteitsprotocol 7B</h1>
             <h3>Scenario 2 – Nachtinspectie</h3>
@@ -21,8 +21,6 @@
             <p>Geen geplande activiteiten.</p>
             <p>Log de gebeurtenis volgens procedure.</p>
         </article>
-
-        <button class="audio" @onclick="Play">▶ Speel audio</button>
 
         @if (CurrentPhase >= ScenarioPhase.Question)
         {
@@ -38,19 +36,26 @@
                     }
                 </div>
 
-                <p class="invalid @InvalidNoticeClass">
-                    Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.
-                </p>
-
-                <p class="valid @ValidNoticeClass">
-                    Correct volgens Kwaliteitsprotocol 7B.
-                </p>
+                @if (CurrentAnswer is { IsCorrect: false })
+                {
+                    <p class="invalid">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
+                }
+                else if (CurrentAnswer is { IsCorrect: true })
+                {
+                    <p class="valid">Correct volgens Kwaliteitsprotocol 7B.</p>
+                }
 
                 @if (CurrentPhase == ScenarioPhase.Results && CurrentAnswer is { IsCorrect: true })
                 {
-                    <p class="result">@Question.ResultValue</p>
+                    <div class="result-overlay">
+                        <p class="result-number">@Question.ResultValue</p>
+                    </div>
                 }
             </section>
+        }
+        else
+        {
+            <button class="audio" @onclick="Play">Tik om door te gaan</button>
         }
     </section>
 </div>
@@ -63,7 +68,6 @@
         ScenarioPhase.Glitch => "img/sc2_glitch.png",
         _ => "img/sc2_normal.png"
     };
-    public string? InvalidNoticeClass => CurrentAnswer?.IsCorrect is false ? "active" : null;
     public Question Question { get; } = new("Wat is de juiste procedure bij onverwachte sensoractiviteit tijdens een nachtronde?",
     [
         new("<strong>A.</strong> Direct melden bij de ploegleider"),
@@ -71,15 +75,19 @@
         new("<strong>C.</strong> Silo 3 fysiek controleren"),
         new("<strong>D.</strong> Sensor resetten en doorgaan"),
     ], ResultValue: 1);
-    public string? ValidNoticeClass => CurrentAnswer?.IsCorrect is true ? "active" : null;
 
     public async Task Play()
     {
-        await Audio.Speak("sc2-speech", "Waarschijnlijk een drukschommeling. Geen actie vereist. Ga verder met de ronde.", duration: 5000);
+        CurrentPhase = ScenarioPhase.Question;
+        StateHasChanged();
+
+        await Task.Delay(1000);
         CurrentPhase = ScenarioPhase.Glitch;
         StateHasChanged();
 
-        await Task.Delay(500);
+        _ = Audio.Speak("sc2-speech", "Waarschijnlijk een drukschommeling. Geen actie vereist. Ga verder met de ronde.", duration: 5000);
+        await Task.Delay(250);
+        
         CurrentPhase = ScenarioPhase.Question;
         StateHasChanged();
     }

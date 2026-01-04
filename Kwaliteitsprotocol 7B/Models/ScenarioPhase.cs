@@ -3,8 +3,8 @@
 public enum ScenarioPhase
 {
     Idle,
-    Glitch,
     Question,
+    Glitch,
     Results,
     Completed
 }

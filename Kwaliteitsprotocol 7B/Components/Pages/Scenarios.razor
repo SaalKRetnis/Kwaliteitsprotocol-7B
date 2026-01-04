@@ -4,7 +4,7 @@
 @inject ScenarioService Scenario
 
 <div class="overview">
-    <section class="overview-box">
+    <section class="overview-box card">
         <h1>Kwaliteitsprotocol 7B</h1>
         <h3>Scenario-overzicht</h3>
 
@@ -12,19 +12,35 @@
 
         <div class="scenario-buttons">
             <button class="scenario-btn" @onclick="() => StartScenario(1)" disabled="@GetScenarioDisabled(1)">
-                Scenario 1 – Melkcontrole
+                <span>Scenario 1 – Melkcontrole</span>
+                @if (ScenarioCompletedStates?.GetValueOrDefault(1) is true)
+                {
+                    <span class="checkmark">✔</span>
+                }
             </button>
 
             <button class="scenario-btn" @onclick="() => StartScenario(2)" disabled="@GetScenarioDisabled(2)">
-                Scenario 2 – Nachtinspectie
+                <span>Scenario 2 – Nachtinspectie</span>
+                @if (ScenarioCompletedStates?.GetValueOrDefault(2) is true)
+                {
+                    <span class="checkmark">✔</span>
+                }
             </button>
 
             <button class="scenario-btn" @onclick="() => StartScenario(3)" disabled="@GetScenarioDisabled(3)">
-                Scenario 3 – Incidentrapportage
+                <span>Scenario 3 – Incidentrapportage</span>
+                @if (ScenarioCompletedStates?.GetValueOrDefault(3) is true)
+                {
+                    <span class="checkmark">✔</span>
+                }
             </button>
 
             <button class="scenario-btn" @onclick="() => StartScenario(4)" disabled="@GetScenarioDisabled(4)">
-                Scenario 4 – Omgevingsmonitoring
+                <span>Scenario 4 – Omgevingsmonitoring</span>
+                @if (ScenarioCompletedStates?.GetValueOrDefault(4) is true)
+                {
+                    <span class="checkmark">✔</span>
+                }
             </button>
         </div>
 
