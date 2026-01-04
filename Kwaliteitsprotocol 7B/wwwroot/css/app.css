@@ -295,9 +295,45 @@ button.secondary {
         opacity: 0.2;
     }
 
+        .scenario > img.glitch-img {
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: none;
+        }
+
+            .scenario > img.glitch-img.active {
+                opacity: 1;
+            }
+
+                .scenario > img.glitch-img.active.tear-1 {
+                    clip-path: inset(0 80% 0 0);
+                    transform: translateX(-8px);
+                }
+
+                .scenario > img.glitch-img.active.tear-2 {
+                    clip-path: inset(0 60% 0 20%);
+                    transform: translateX(6px);
+                }
+
+                .scenario > img.glitch-img.active.tear-3 {
+                    clip-path: inset(0 40% 0 40%);
+                    transform: translateX(-4px);
+                }
+
+                .scenario > img.glitch-img.active.tear-4 {
+                    clip-path: inset(0 20% 0 60%);
+                    transform: translateX(10px);
+                }
+
+                .scenario > img.glitch-img.active.tear-5 {
+                    clip-path: inset(0 0 0 80%);
+                    transform: translateX(-12px);
+                }
+
 .card {
     background-color: var(--fn-surface);
-    padding: 2rem 2.5rem;
+    padding: 1rem 1.25rem;
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     max-width: 480px;
@@ -315,18 +351,19 @@ button.secondary {
 
 header h1 {
     font-size: 1.8rem;
-    margin-bottom: 0.5rem;
+    margin: .5rem 0;
 }
 
 header h3 {
     font-size: 1.2rem;
     color: var(--fn-color-muted);
+    margin: .5rem 0;
 }
 
 header h5 {
     font-size: 1rem;
     color: var(--fn-color-anchor);
-    margin-bottom: 1rem;
+    margin: .5rem 0 1rem 0;
 }
 
 .instructions p {
@@ -350,7 +387,7 @@ button.audio {
     }
 
 .question {
-    margin-top: 2rem;
+    margin-top: 1rem;
     background-color: var(--fn-surface);
     padding: 1rem;
     border-radius: 0.5rem;
@@ -361,7 +398,7 @@ button.audio {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: .5rem;
 }
 
 button.answer {
@@ -461,8 +498,8 @@ button.answer {
 
 @media (max-width: 480px) {
     .card {
-        padding: 1.5rem;
-        border-radius: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
         max-width: 100%;
     }
 }
@@ -582,5 +619,6 @@ button.answer {
     opacity: 0;
     pointer-events: none;
     max-width: 320px;
+    transition: opacity 0.3s ease;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }

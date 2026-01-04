@@ -6,7 +6,8 @@
 @inject IJSRuntime JS
 
 <div class="scenario">
-    <img src="@ImagePath" alt="Nachtinspectie achtergrond" />
+    <img src="img/sc2_normal.png" alt="" />
+    <img class="glitch-img @ImageClass @TearClass" src="img/sc2_glitch.png" alt="" />
 
     <section class="contents card">
         <header>
@@ -63,11 +64,8 @@
 @code {
     public Answer? CurrentAnswer { get; private set; }
     public ScenarioPhase CurrentPhase { get; private set; } = ScenarioPhase.Idle;
-    public string ImagePath => CurrentPhase switch
-    {
-        ScenarioPhase.Glitch => "img/sc2_glitch.png",
-        _ => "img/sc2_normal.png"
-    };
+    public string? ImageClass => CurrentPhase is ScenarioPhase.Glitch ? "active" : null;
+    public string? TearClass { get; private set; }
     public Question Question { get; } = new("Wat is de juiste procedure bij onverwachte sensoractiviteit tijdens een nachtronde?",
     [
         new("<strong>A.</strong> Direct melden bij de ploegleider"),
@@ -82,12 +80,8 @@
         StateHasChanged();
 
         await Task.Delay(1000);
-        CurrentPhase = ScenarioPhase.Glitch;
-        StateHasChanged();
+        await Glitch();
 
-        _ = Audio.Speak("sc2-speech", "Waarschijnlijk een drukschommeling. Geen actie vereist. Ga verder met de ronde.", duration: 5000);
-        await Task.Delay(250);
-        
         CurrentPhase = ScenarioPhase.Question;
         StateHasChanged();
     }
@@ -106,6 +100,26 @@
             await Task.Delay(1000);
             await Scenario.MarkScenario(2, completed: true);
             await JS.InvokeVoidAsync("history.back");
+        }
+    }
+
+    async Task Glitch()
+    {
+        CurrentPhase = ScenarioPhase.Glitch;
+        StateHasChanged();
+
+        await Task.Delay(500);
+        _ = Audio.Speak("sc2-speech", "Waarschijnlijk een drukschommeling. Geen actie vereist. Ga verder met de ronde.", duration: 5000);
+
+        for (var i = 0; i < 6; i++)
+        {
+            TearClass = $"tear-{Random.Shared.Next(1, 6)}";
+            StateHasChanged();
+            await Task.Delay(Random.Shared.Next(30, 80));
+            
+            TearClass = null;
+            StateHasChanged();
+            await Task.Delay(Random.Shared.Next(20, 60));
         }
     }
 }
