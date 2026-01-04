@@ -1,0 +1,27 @@
+﻿@page "/scenarios"
+@attribute [Authorize]
+@inject NavigationManager Navigation
+@inject ScenarioService Scenario
+
+<h1>Kwaliteitsprotocol 7B</h1>
+<h3>Scenario-overzicht</h3>
+
+<p>Voltooi alle scenario's om de module af te ronden.</p>
+
+<button @onclick="() => StartScenario(1)">Scenario 1 – Melkcontrole</button>
+<button @onclick="() => StartScenario(2)">Scenario 2 – Nachtinspectie</button>
+<button @onclick="() => StartScenario(3)">Scenario 3 – Incidentrapportage</button>
+<button @onclick="() => StartScenario(4)">Scenario 4 – Omgevingsmonitoring</button>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (await Scenario.AreAllScenariosCompleted())
+        {
+            Navigation.NavigateTo("/end", replace: true);
+        }
+    }
+
+    public void StartScenario(int scenario)
+        => Navigation.NavigateTo($"/scenario/{scenario}");
+}

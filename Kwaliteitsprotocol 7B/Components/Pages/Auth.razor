@@ -1,0 +1,31 @@
+﻿@page "/auth"
+@inject AppAuthenticationStateProvider Authentication
+@inject NavigationManager Navigation
+
+<h1>Kwaliteitsprotocol 7B – Toegang vereist</h1>
+<p>Voer uw persoonlijke toegangscode in om de module te openen.</p>
+<input @bind="Input" />
+<p class="notice @NoticeClass">Ongeldige toegangscode. Probeer opnieuw.</p>
+<p class="glitch @GlitchClass">CLASSIFICATIE BEVESTIGD – MELK‑Δ17</p>
+<button @onclick="Verify">Verifiëren</button>
+
+@code {
+    bool? InputIsValid;
+
+    public string? Input { get; set; }
+
+    public string? GlitchClass => InputIsValid is true ? "active" : null;
+    public string? NoticeClass => InputIsValid is false ? "active" : null;
+
+    public async Task Verify()
+    {
+        InputIsValid = "2301".Equals(Input, StringComparison.OrdinalIgnoreCase);
+        if (InputIsValid is true)
+        {
+            await Authentication.UpdateAuthenticationState(new("2301", "Feenstra, Tseard"), rememberUser: true);
+            await Task.Delay(200);
+
+            Navigation.NavigateTo("/", replace: true, forceLoad: true);
+        }
+    }
+}

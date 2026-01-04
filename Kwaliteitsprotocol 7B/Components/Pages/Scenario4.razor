@@ -1,0 +1,81 @@
+﻿@page "/scenario/4"
+@attribute [Authorize]
+@inject AudioService Audio
+@inject NavigationManager Navigation
+@inject ScenarioService Scenario
+@inject IJSRuntime JS
+
+<h1>Kwaliteitsprotocol 7B</h1>
+<h3>Scenario 4 – Omgevingsmonitoring</h3>
+<h5>Sensoranalyse – Model S3‑EX</h5>
+
+<p>De sensor registreert een onbekend bewegingspatroon in Silo 3.</p>
+<p>Geen warmtebron gedetecteerd.</p>
+<p>Geen menselijke of dierlijke activiteit.</p>
+<p>Volg de standaardprocedure.</p>
+
+<img src="@ImagePath" />
+<button @onclick="Play">▶ Speel audio</button>
+
+@if (CurrentPhase >= ScenarioPhase.Question)
+{
+    <p>@Question.Text</p>
+    @foreach (var answer in Question.Answers)
+    {
+        <button @onclick="() => ProvideAnswer(answer)" @key="answer">@answer.Text</button>
+    }
+
+    <p class="invalid @InvalidNoticeClass">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
+    <p class="valid @ValidNoticeClass">Correct volgens Kwaliteitsprotocol 7B.</p>
+    @if (CurrentPhase == ScenarioPhase.Results && CurrentAnswer is { IsCorrect: true })
+    {
+        <p>@Question.ResultValue</p>
+    }
+}
+
+@code {
+    public Answer? CurrentAnswer { get; private set; }
+    public ScenarioPhase CurrentPhase { get; private set; } = ScenarioPhase.Idle;
+    public string ImagePath => CurrentPhase switch
+    {
+        ScenarioPhase.Glitch => "img/sc4_glitch.png",
+        _ => "img/sc4_normal.png"
+    };
+    public string? InvalidNoticeClass => CurrentAnswer?.IsCorrect is false ? "invalid" : null;
+    public Question Question { get; } = new("Welke actie is volgens protocol vereist bij detectie van een onbekend bewegingspatroon?",
+    [
+        new("<strong>A.</strong> Rapporteren aan de kwaliteitsmanager", IsCorrect: true),
+        new("<strong>B.</strong> Sensor resetten"),
+        new("<strong>C.</strong> Direct evacueren"),
+        new("<strong>D.</strong> Geen actie vereist"),
+    ], ResultValue: 6);
+    public string? ValidNoticeClass => CurrentAnswer?.IsCorrect is true ? "valid" : null;
+
+    public async Task Play()
+    {
+        await Audio.Speak("sc4-speech", "Dit… lijkt een foutmelding. De sensor registreert… geen bekende entiteit.", duration: 6000);
+        CurrentPhase = ScenarioPhase.Glitch;
+        StateHasChanged();
+
+        await Task.Delay(500);
+        CurrentPhase = ScenarioPhase.Question;
+        StateHasChanged();
+    }
+
+    public async Task ProvideAnswer(Answer answer)
+    {
+        CurrentAnswer = answer;
+        if (answer.IsCorrect)
+        {
+            CurrentPhase = ScenarioPhase.Results;
+
+            await Task.Delay(1000);
+            CurrentPhase = ScenarioPhase.Completed;
+            StateHasChanged();
+
+            await Task.Delay(1000);
+            await Scenario.MarkScenario(4, completed: true);
+            await JS.InvokeVoidAsync("history.back");
+        }
+    }
+}

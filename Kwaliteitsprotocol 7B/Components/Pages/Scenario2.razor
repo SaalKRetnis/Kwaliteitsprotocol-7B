@@ -1,0 +1,81 @@
+﻿@page "/scenario/2"
+@attribute [Authorize]
+@inject AudioService Audio
+@inject NavigationManager Navigation
+@inject ScenarioService Scenario
+@inject IJSRuntime JS
+
+<h1>Kwaliteitsprotocol 7B</h1>
+<h3>Scenario 2 – Nachtinspectie</h3>
+<h5>Nachtploeg – 02:41</h5>
+
+<p>Tijdens de ronde registreert de niveausensor onverwachte beweging in Silo 3.</p>
+<p>Geen personeel aanwezig.</p>
+<p>Geen geplande activiteiten.</p>
+<p>Log de gebeurtenis volgens procedure.</p>
+
+<img src="@ImagePath" />
+<button @onclick="Play">▶ Speel audio</button>
+
+@if (CurrentPhase >= ScenarioPhase.Question)
+{
+    <p>@Question.Text</p>
+    @foreach (var answer in Question.Answers)
+    {
+        <button @onclick="() => ProvideAnswer(answer)" @key="answer">@answer.Text</button>
+    }
+
+    <p class="invalid @InvalidNoticeClass">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
+    <p class="valid @ValidNoticeClass">Correct volgens Kwaliteitsprotocol 7B.</p>
+    @if (CurrentPhase == ScenarioPhase.Results && CurrentAnswer is { IsCorrect: true })
+    {
+        <p>@Question.ResultValue</p>
+    }
+}
+
+@code {
+    public Answer? CurrentAnswer { get; private set; }
+    public ScenarioPhase CurrentPhase { get; private set; } = ScenarioPhase.Idle;
+    public string ImagePath => CurrentPhase switch
+    {
+        ScenarioPhase.Glitch => "img/sc2_glitch.png",
+        _ => "img/sc2_normal.png"
+    };
+    public string? InvalidNoticeClass => CurrentAnswer?.IsCorrect is false ? "invalid" : null;
+    public Question Question { get; } = new("Wat is de juiste procedure bij onverwachte sensoractiviteit tijdens een nachtronde?",
+    [
+        new("<strong>A.</strong> Direct melden bij de ploegleider"),
+        new("<strong>B.</strong> Loggen als \"drukschommeling\"", IsCorrect: true),
+        new("<strong>C.</strong> Silo 3 fysiek controleren"),
+        new("<strong>D.</strong> Sensor resetten en doorgaan"),
+    ], ResultValue: 1);
+    public string? ValidNoticeClass => CurrentAnswer?.IsCorrect is true ? "valid" : null;
+
+    public async Task Play()
+    {
+        await Audio.Speak("sc2-speech", "Waarschijnlijk een drukschommeling. Geen actie vereist. Ga verder met de ronde.", duration: 5000);
+        CurrentPhase = ScenarioPhase.Glitch;
+        StateHasChanged();
+
+        await Task.Delay(500);
+        CurrentPhase = ScenarioPhase.Question;
+        StateHasChanged();
+    }
+
+    public async Task ProvideAnswer(Answer answer)
+    {
+        CurrentAnswer = answer;
+        if (answer.IsCorrect)
+        {
+            CurrentPhase = ScenarioPhase.Results;
+
+            await Task.Delay(1000);
+            CurrentPhase = ScenarioPhase.Completed;
+            StateHasChanged();
+
+            await Task.Delay(1000);
+            await Scenario.MarkScenario(2, completed: true);
+            await JS.InvokeVoidAsync("history.back");
+        }
+    }
+}

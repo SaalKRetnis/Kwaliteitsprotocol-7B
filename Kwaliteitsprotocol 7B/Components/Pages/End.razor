@@ -1,0 +1,54 @@
+﻿@page "/end"
+@attribute [Authorize]
+@inject AudioService Audio
+@inject HintsService Hints
+
+<h1>Kwaliteitsprotocol 7B</h1>
+<h3>Module voltooid</h3>
+
+<p>Je hebt alle vier de scenario’s afgerond.</p>
+<p>Combineer de vier cijfers die je hebt ontvangen.</p>
+<p>Deze code geeft toegang tot het beveiligde object.</p>
+<p>Let op: de cijfers worden niet opnieuw getoond.</p>
+
+<button @onclick="Help" disabled="@(CurrentHint is not null)">Hulplijn inschakelen</button>
+
+@if (CurrentHint is { } hint)
+{
+    <p>@hint.Anecdote</p>
+    <img src="@hint.Image" />
+    @if (ShowValue)
+    {
+        <p>@hint.Value</p>
+    }
+}
+
+@code {
+    public Hint? CurrentHint { get; private set; }
+    public bool ShowValue { get; private set; }
+
+    public async Task Help()
+    {
+        if (!await Hints.HasGeneratedHint())
+        {
+            await Audio.Speak("qpq-speech", "Voor wat hoort wat. Hulplijnen vereisen wederdiensten.", duration: 3000);
+        }
+
+        ShowValue = false;
+        var hint = CurrentHint = await Hints.GenerateRandomHint();
+        StateHasChanged();
+
+        await Audio.Play(hint.Audio);
+
+        await Task.Delay(5000);
+        ShowValue = true;
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        ShowValue = false;
+        StateHasChanged();
+
+        await Task.Delay(1000);
+        CurrentHint = null;
+    }
+}

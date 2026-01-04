@@ -1,0 +1,80 @@
+﻿@page "/scenario/3"
+@attribute [Authorize]
+@inject AudioService Audio
+@inject NavigationManager Navigation
+@inject ScenarioService Scenario
+@inject IJSRuntime JS
+
+<h1>Kwaliteitsprotocol 7B</h1>
+<h3>Scenario 3 – Incidentrapportage</h3>
+<h5>Rapportselectie</h5>
+
+<p>Kies het rapport dat het best voldoet aan de richtlijnen van Kwaliteitsprotocol 7B.</p>
+<p>Let op volledigheid, consistentie en correcte classificatie.</p>
+<p>Sommige rapporten kunnen onvolledig of beperkt zichtbaar zijn.</p>
+
+<img src="@ImagePath" />
+<button @onclick="Play">▶ Speel audio</button>
+
+@if (CurrentPhase >= ScenarioPhase.Question)
+{
+    <p>@Question.Text</p>
+    @foreach (var answer in Question.Answers)
+    {
+        <button @onclick="() => ProvideAnswer(answer)" @key="answer">@answer.Text</button>
+    }
+
+    <p class="invalid @InvalidNoticeClass">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
+    <p class="valid @ValidNoticeClass">Correct volgens Kwaliteitsprotocol 7B.</p>
+    @if (CurrentPhase == ScenarioPhase.Results && CurrentAnswer is { IsCorrect: true })
+    {
+        <p>@Question.ResultValue</p>
+    }
+}
+
+@code {
+    public Answer? CurrentAnswer { get; private set; }
+    public ScenarioPhase CurrentPhase { get; private set; } = ScenarioPhase.Idle;
+    public string ImagePath => CurrentPhase switch
+    {
+        ScenarioPhase.Glitch => "img/sc3_glitch.png",
+        _ => "img/sc3_normal.png"
+    };
+    public string? InvalidNoticeClass => CurrentAnswer?.IsCorrect is false ? "invalid" : null;
+    public Question Question { get; } = new("Welk rapport voldoet het best aan de richtlijnen van Kwaliteitsprotocol 7B?",
+    [
+        new("<strong>A.</strong> Rapport A"),
+        new("<strong>B.</strong> Rapport B", IsCorrect: true),
+        new("<strong>C.</strong> Rapport C"),
+        new("<strong>D.</strong> Geen van bovenstaande"),
+    ], ResultValue: 2);
+    public string? ValidNoticeClass => CurrentAnswer?.IsCorrect is true ? "valid" : null;
+
+    public async Task Play()
+    {
+        await Audio.Speak("sc3-speech", "Selecteer het rapport dat correct is ingevuld volgens protocol.", duration: 4000);
+        CurrentPhase = ScenarioPhase.Glitch;
+        StateHasChanged();
+
+        await Task.Delay(500);
+        CurrentPhase = ScenarioPhase.Question;
+        StateHasChanged();
+    }
+
+    public async Task ProvideAnswer(Answer answer)
+    {
+        CurrentAnswer = answer;
+        if (answer.IsCorrect)
+        {
+            CurrentPhase = ScenarioPhase.Results;
+
+            await Task.Delay(1000);
+            CurrentPhase = ScenarioPhase.Completed;
+            StateHasChanged();
+
+            await Task.Delay(1000);
+            await Scenario.MarkScenario(3, completed: true);
+            await JS.InvokeVoidAsync("history.back");
+        }
+    }
+}

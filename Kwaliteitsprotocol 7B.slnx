@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Kwaliteitsprotocol 7B/Kwaliteitsprotocol 7B.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>
