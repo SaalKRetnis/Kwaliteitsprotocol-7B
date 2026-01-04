@@ -5,32 +5,48 @@
 @inject ScenarioService Scenario
 @inject IJSRuntime JS
 
-<h1>Kwaliteitsprotocol 7B</h1>
-<h3>Scenario 1 – Melkcontrole</h3>
-<h5>Routinecontrole – Silo 3</h5>
+<div class="scenario">
+    <img src="@ImagePath" alt="Melkcontrole achtergrond" />
 
-<p>Voer een visuele inspectie uit van de melkmonsters.</p>
-<p>Let op afwijkingen in kleur, temperatuur en lichtreflectie.</p>
-<p>Monster #17 toont een lichte UV‑afwijking. Noteer volgens protocol.</p>
+    <section class="contents">
+        <header>
+            <h1>Kwaliteitsprotocol 7B</h1>
+            <h3>Scenario 1 – Melkcontrole</h3>
+            <h5>Routinecontrole – Silo 3</h5>
+        </header>
 
-<img src="@ImagePath" />
-<button @onclick="Play">▶ Speel audio</button>
+        <article class="instructions">
+            <p>Voer een visuele inspectie uit van de melkmonsters.</p>
+            <p>Let op afwijkingen in kleur, temperatuur en lichtreflectie.</p>
+            <p><strong>Monster #17</strong> toont een lichte UV‑afwijking. Noteer volgens protocol.</p>
+        </article>
 
-@if (CurrentPhase >= ScenarioPhase.Question)
-{
-    <p>@Question.Text</p>
-    @foreach (var answer in Question.Answers)
-    {
-        <button @onclick="() => ProvideAnswer(answer)" @key="answer">@answer.Text</button>
-    }
+        <button class="audio" @onclick="Play">▶ Speel audio</button>
 
-    <p class="invalid @InvalidNoticeClass">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
-    <p class="valid @ValidNoticeClass">Correct volgens Kwaliteitsprotocol 7B.</p>
-    @if (CurrentPhase == ScenarioPhase.Results && CurrentAnswer is { IsCorrect: true })
-    {
-        <p>@Question.ResultValue</p>
-    }
-}
+        @if (CurrentPhase >= ScenarioPhase.Question)
+        {
+            <section class="question">
+                <p class="question-text">@((MarkupString)Question.Text)</p>
+                <div class="answers">
+                    @foreach (var answer in Question.Answers)
+                    {
+                        <button class="answer" @onclick="() => ProvideAnswer(answer)" @key="answer">
+                            @((MarkupString)answer.Text)
+                        </button>
+                    }
+                </div>
+
+                <p class="invalid @InvalidNoticeClass">Onjuist volgens Kwaliteitsprotocol 7B. Let op: afwijkende keuzes worden gelogd.</p>
+                <p class="valid @ValidNoticeClass">Correct volgens Kwaliteitsprotocol 7B.</p>
+
+                @if (CurrentPhase == ScenarioPhase.Results && CurrentAnswer is { IsCorrect: true })
+                {
+                    <p class="result">@Question.ResultValue</p>
+                }
+            </section>
+        }
+    </section>
+</div>
 
 @code {
     public Answer? CurrentAnswer { get; private set; }
@@ -40,7 +56,7 @@
         ScenarioPhase.Glitch => "img/sc1_glitch.png",
         _ => "img/sc1_normal.png"
     };
-    public string? InvalidNoticeClass => CurrentAnswer?.IsCorrect is false ? "invalid" : null;
+    public string? InvalidNoticeClass => CurrentAnswer?.IsCorrect is false ? "active" : null;
     public Question Question { get; } = new("Welke parameter wijkt het meest af van de standaardwaarden?",
     [
         new("<strong>A.</strong> Vetpercentage"),
@@ -48,7 +64,7 @@
         new("<strong>C.</strong> UV‑reflectiepatroon", IsCorrect: true),
         new("<strong>D.</strong> pH‑waarde"),
     ], ResultValue: 9);
-    public string? ValidNoticeClass => CurrentAnswer?.IsCorrect is true ? "valid" : null;
+    public string? ValidNoticeClass => CurrentAnswer?.IsCorrect is true ? "active" : null;
 
     public async Task Play()
     {

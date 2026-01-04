@@ -1,30 +1,50 @@
 ﻿@page "/end"
 @attribute [Authorize]
 @inject AudioService Audio
+@inject AppAuthenticationStateProvider Authentication
 @inject HintsService Hints
+@inject NavigationManager Navigation
 
-<h1>Kwaliteitsprotocol 7B</h1>
-<h3>Module voltooid</h3>
+<div class="end">
+    <section class="end-box">
+        <header>
+            <h1>Kwaliteitsprotocol 7B</h1>
+            <h3>Module voltooid</h3>
+        </header>
 
-<p>Je hebt alle vier de scenario’s afgerond.</p>
-<p>Combineer de vier cijfers die je hebt ontvangen.</p>
-<p>Deze code geeft toegang tot het beveiligde object.</p>
-<p>Let op: de cijfers worden niet opnieuw getoond.</p>
+        <article class="instructions">
+            <p>Je hebt alle vier de scenario’s afgerond.</p>
+            <p>Combineer de vier cijfers die je hebt ontvangen.</p>
+            <p>Deze code geeft toegang tot het beveiligde object.</p>
+            <p>Let op: de cijfers worden niet opnieuw getoond.</p>
+        </article>
 
-<button @onclick="Help" disabled="@(CurrentHint is not null)">Hulplijn inschakelen</button>
+        <div class="end-buttons">
+            <button class="primary" @onclick="Help" disabled="@HintDisabled">Hulplijn inschakelen</button>
+            <button class="secondary" @onclick="LogOff">Uitloggen</button>
+        </div>
+    </section>
 
-@if (CurrentHint is { } hint)
-{
-    <p>@hint.Anecdote</p>
-    <img src="@hint.Image" />
-    @if (ShowValue)
+    @if (CurrentHint is { } hint)
     {
-        <p>@hint.Value</p>
+        <div class="hint-overlay">
+            <div class="hint-content">
+                <p class="hint-anecdote">@((MarkupString)hint.Anecdote)</p>
+
+                <img class="hint-image" src="@hint.Image" alt="Hint" />
+
+                @if (ShowValue)
+                {
+                    <p class="hint-value">@((MarkupString)hint.Value)</p>
+                }
+            </div>
+        </div>
     }
-}
+</div>
 
 @code {
     public Hint? CurrentHint { get; private set; }
+    public string? HintDisabled => CurrentHint is not null ? "disabled" : null;
     public bool ShowValue { get; private set; }
 
     public async Task Help()
@@ -45,10 +65,16 @@
         StateHasChanged();
 
         await Task.Delay(3000);
+        CurrentHint = null;
         ShowValue = false;
         StateHasChanged();
+    }
 
-        await Task.Delay(1000);
-        CurrentHint = null;
+    public async Task LogOff()
+    {
+        await Authentication.UpdateAuthenticationState(userSession: null);
+        SecureStorage.Default.RemoveAll();
+
+        Navigation.NavigateTo("/", replace: true);
     }
 }

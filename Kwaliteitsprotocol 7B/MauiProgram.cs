@@ -22,10 +22,11 @@ namespace Kwaliteitsprotocol_7B
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AppAuthenticationStateProvider>();
             builder.Services.TryAddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<AppAuthenticationStateProvider>());
-            builder.Services.AddSingleton<AudioService>();
-            builder.Services.AddSingleton<AuthenticationService>();
-            builder.Services.AddSingleton<HintsService>();
-            builder.Services.AddSingleton<ScenarioService>();
+            builder.Services.AddScoped<AudioService>();
+            builder.Services.AddScoped<AuthenticationService>();
+            builder.Services.AddScoped<DialogService>();
+            builder.Services.AddScoped<HintsService>();
+            builder.Services.AddScoped<ScenarioService>();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

@@ -1,24 +1,42 @@
 ﻿@page "/"
 @attribute [Authorize]
+@inject AppAuthenticationStateProvider Authentication
 @inject NavigationManager Navigation
 @inject ScenarioService Scenario
 
-<h1>Kwaliteitsprotocol 7B</h1>
-<h3>Interne trainingsmodule – De Sinterkaasfabriek</h3>
+<div class="home">
+    <section class="home-box">
+        <h1>Kwaliteitsprotocol 7B</h1>
+        <h3>Interne trainingsmodule – De Sinterkaasfabriek</h3>
 
-<p>Deze module bevat vier scenario’s voor kwaliteitsbewaking.</p>
-<p>Voltooi alle scenario’s en noteer de cijfers die je ontvangt.</p>
+        <p>Deze module bevat vier scenario’s voor kwaliteitsbewaking.</p>
+        <p>Voltooi alle scenario’s en noteer de cijfers die je ontvangt.</p>
 
-<button @onclick="StartTraining">Start training</button>
-<p>Alleen voor intern gebruik. Onbevoegde toegang verboden.</p>
+        <div class="home-buttons">
+            <button class="primary" @onclick="StartTraining">Start training</button>
+            <button class="secondary" @onclick="LogOff">Uitloggen</button>
+        </div>
+
+        <p class="footer-note">Alleen voor intern gebruik. Onbevoegde toegang verboden.</p>
+    </section>
+</div>
 
 @code {
     protected override async Task OnInitializedAsync()
     {
-        if (await Scenario.AreAllScenariosCompleted())
+        var states = await Scenario.GetScenarioCompletionStates();
+        if (states.All(e => e.Value))
         {
             Navigation.NavigateTo("/end", replace: true);
         }
+    }
+
+    public async Task LogOff()
+    {
+        await Authentication.UpdateAuthenticationState(userSession: null);
+        SecureStorage.Default.RemoveAll();
+
+        Navigation.NavigateTo("/", replace: true);
     }
 
     public void StartTraining()

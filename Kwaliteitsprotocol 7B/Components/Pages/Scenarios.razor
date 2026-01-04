@@ -3,20 +3,44 @@
 @inject NavigationManager Navigation
 @inject ScenarioService Scenario
 
-<h1>Kwaliteitsprotocol 7B</h1>
-<h3>Scenario-overzicht</h3>
+<div class="overview">
+    <section class="overview-box">
+        <h1>Kwaliteitsprotocol 7B</h1>
+        <h3>Scenario-overzicht</h3>
 
-<p>Voltooi alle scenario's om de module af te ronden.</p>
+        <p>Voltooi alle scenario's om de module af te ronden.</p>
 
-<button @onclick="() => StartScenario(1)">Scenario 1 – Melkcontrole</button>
-<button @onclick="() => StartScenario(2)">Scenario 2 – Nachtinspectie</button>
-<button @onclick="() => StartScenario(3)">Scenario 3 – Incidentrapportage</button>
-<button @onclick="() => StartScenario(4)">Scenario 4 – Omgevingsmonitoring</button>
+        <div class="scenario-buttons">
+            <button class="scenario-btn" @onclick="() => StartScenario(1)" disabled="@GetScenarioDisabled(1)">
+                Scenario 1 – Melkcontrole
+            </button>
+
+            <button class="scenario-btn" @onclick="() => StartScenario(2)" disabled="@GetScenarioDisabled(2)">
+                Scenario 2 – Nachtinspectie
+            </button>
+
+            <button class="scenario-btn" @onclick="() => StartScenario(3)" disabled="@GetScenarioDisabled(3)">
+                Scenario 3 – Incidentrapportage
+            </button>
+
+            <button class="scenario-btn" @onclick="() => StartScenario(4)" disabled="@GetScenarioDisabled(4)">
+                Scenario 4 – Omgevingsmonitoring
+            </button>
+        </div>
+
+        <p class="footer-note">Alleen voor intern gebruik. Onbevoegde toegang verboden.</p>
+    </section>
+</div>
 
 @code {
+    public IReadOnlyDictionary<int, bool>? ScenarioCompletedStates { get; private set; }
+
+    public string? GetScenarioDisabled(int scenario) => ScenarioCompletedStates?.GetValueOrDefault(scenario) is true ? "disabled" : null;
+
     protected override async Task OnInitializedAsync()
     {
-        if (await Scenario.AreAllScenariosCompleted())
+        var states = ScenarioCompletedStates = await Scenario.GetScenarioCompletionStates();
+        if (states.All(e => e.Value))
         {
             Navigation.NavigateTo("/end", replace: true);
         }

@@ -2,12 +2,19 @@
 @inject AppAuthenticationStateProvider Authentication
 @inject NavigationManager Navigation
 
-<h1>Kwaliteitsprotocol 7B – Toegang vereist</h1>
-<p>Voer uw persoonlijke toegangscode in om de module te openen.</p>
-<input @bind="Input" />
-<p class="notice @NoticeClass">Ongeldige toegangscode. Probeer opnieuw.</p>
-<p class="glitch @GlitchClass">CLASSIFICATIE BEVESTIGD – MELK‑Δ17</p>
-<button @onclick="Verify">Verifiëren</button>
+<div class="auth">
+    <section class="auth-box">
+        <h1>Kwaliteitsprotocol 7B – Toegang vereist</h1>
+        <p>Voer uw persoonlijke toegangscode in om de module te openen.</p>
+
+        <input class="auth-input" @bind="Input" />
+
+        <p class="notice @NoticeClass">Ongeldige toegangscode. Probeer opnieuw.</p>
+        <p class="glitch @GlitchClass">CLASSIFICATIE BEVESTIGD – MELK‑Δ17</p>
+
+        <button class="auth-button" @onclick="Verify">Verifiëren</button>
+    </section>
+</div>
 
 @code {
     bool? InputIsValid;
@@ -23,7 +30,7 @@
         if (InputIsValid is true)
         {
             await Authentication.UpdateAuthenticationState(new("2301", "Feenstra, Tseard"), rememberUser: true);
-            await Task.Delay(200);
+            await Task.Delay(500);
 
             Navigation.NavigateTo("/", replace: true, forceLoad: true);
         }

@@ -1,18 +1,12 @@
 ﻿namespace Kwaliteitsprotocol_7B.Services;
 
+#pragma warning disable CA1822
 public sealed class ScenarioService
 {
-    public async Task<bool> AreAllScenariosCompleted()
+    public async Task<IReadOnlyDictionary<int, bool>> GetScenarioCompletionStates()
     {
-        var states = await Task.WhenAll(
-        [
-            IsScenarioCompleted(1),
-            IsScenarioCompleted(2),
-            IsScenarioCompleted(3),
-            IsScenarioCompleted(4),
-        ]);
-
-        return states.Any(state => state);
+        var states = await Task.WhenAll(Enumerable.Range(1, 4).Select(IsScenarioCompleted));
+        return states.Select((c, i) => (Completed: c, Index: i)).ToDictionary(e => e.Index + 1, e => e.Completed);
     }
 
     public async Task MarkScenario(int scenario, bool completed)

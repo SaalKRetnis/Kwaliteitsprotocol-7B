@@ -3,6 +3,7 @@ using System.Text.Json;
 
 namespace Kwaliteitsprotocol_7B.Services;
 
+#pragma warning disable CA1822
 public sealed class AuthenticationService
 {
     const string UserSessionKey = "app_user_session";

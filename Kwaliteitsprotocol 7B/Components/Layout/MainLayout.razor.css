@@ -1,0 +1,29 @@
+.layout {
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    width: 100vw;
+}
+
+    .layout > * {
+        position: absolute;
+    }
+
+    .layout > main {
+        inset: 0;
+    }
+
+    .layout > #toast {
+        background-color: #3333;
+        border-radius: .5rem;
+        bottom: 1.5rem;
+        font-weight: 400;
+        left: 1rem;
+        opacity: 0;
+        padding: .5rem 1rem;
+        pointer-events: none;
+        right: 1rem;
+        transition: opacity .5s ease;
+        user-select: none;
+        z-index: 100;
+    }
