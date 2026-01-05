@@ -1,0 +1,69 @@
+﻿@inject AudioService Audio
+@implements IDisposable
+
+<div class="overlay-backdrop" @onclick="CloseIfAllowed">
+    <div class="overlay-panel" @onclick:stopPropagation="true">
+        <h2>Audio-initialisatie</h2>
+        <p>Controle van audio-instellingen…</p>
+
+        @if (!IsVolumeOk)
+        {
+            <p class="warning">
+                Het volume staat te laag om de instructies te kunnen volgen.
+                Verhoog het volume en probeer opnieuw.
+            </p>
+        }
+        else
+        {
+            <p class="ok">Volume gedetecteerd. Je kunt doorgaan.</p>
+        }
+
+        <button class="primary" disabled="@IsVolumeOkDisabled" @onclick="Confirm">
+            Doorgaan
+        </button>
+    </div>
+</div>
+
+@code {
+    PeriodicTimer? Timer;
+
+    [Parameter] public EventCallback<bool> OnResult { get; set; }
+
+    public bool IsVolumeOk { get; set; }
+    public string? IsVolumeOkDisabled => IsVolumeOk ? null : "disabled";
+
+    protected override void OnInitialized()
+    {
+        IsVolumeOk = CheckVolume();
+        var timer = Timer = new(TimeSpan.FromMilliseconds(300));
+        _ = Task.Run(async () =>
+        {
+            while (await timer.WaitForNextTickAsync())
+            {
+                var ok = CheckVolume();
+                if (ok != IsVolumeOk)
+                {
+                    IsVolumeOk = ok;
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        });
+    }
+
+    private async Task Confirm()
+        => await OnResult.InvokeAsync(true);
+
+    private async Task CloseIfAllowed()
+    {
+        if (IsVolumeOk)
+        {
+            await Confirm();
+        }
+    }
+
+    private bool CheckVolume()
+        => Audio.GetMediaVolume() >= .5;
+
+    public void Dispose()
+        => Timer?.Dispose();
+}

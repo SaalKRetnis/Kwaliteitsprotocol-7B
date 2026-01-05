@@ -75,6 +75,14 @@
         new("<strong>D.</strong> Geen van bovenstaande"),
     ], ResultValue: 2);
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Audio.PlayOnce("sc3-ex-speech");
+        }
+    }
+
     public async Task Play()
     {
         CurrentPhase = ScenarioPhase.Question;
@@ -117,7 +125,7 @@
             TearClass = $"tear-{Random.Shared.Next(1, 6)}";
             StateHasChanged();
             await Task.Delay(Random.Shared.Next(30, 80));
-            
+
             TearClass = null;
             StateHasChanged();
             await Task.Delay(Random.Shared.Next(20, 60));

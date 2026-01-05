@@ -13,14 +13,27 @@
         </header>
 
         <article class="instructions">
-            <p>Je hebt alle vier de scenario’s afgerond.</p>
-            <p>Combineer de vier cijfers die je hebt ontvangen.</p>
-            <p>Deze code geeft toegang tot het beveiligde object.</p>
-            <p>Let op: de cijfers worden niet opnieuw getoond.</p>
+            <p>De trainingsmodule is succesvol afgerond.</p>
+            <p>Jouw antwoorden zijn geregistreerd en verwerkt in het interne kwaliteitssysteem.</p>
+            <p>Alle procedurele stappen zijn correct doorlopen.</p>
+
+            @if (ShowGlitch)
+            {
+                <p class="glitch-text">
+                    <span>De vier ontvangen cijfers vormen—</span>
+                    <span class="glitch-frag">[DATA CORRUPT]</span>
+                </p>
+            }
+
+            <p><strong>Let op: </strong><i>Gegevens worden bij uitloggen automatisch gewist.</i></p>
         </article>
 
         <div class="end-buttons">
-            <button class="primary" @onclick="Help" disabled="@HintDisabled">Hulplijn inschakelen</button>
+            @if (ShowGlitch)
+            {
+                <button class="primary" @onclick="Help" disabled="@HintDisabled">Hulplijn inschakelen</button>
+            }
+
             <button class="secondary" @onclick="LogOff">Uitloggen</button>
         </div>
     </section>
@@ -45,13 +58,36 @@
 @code {
     public Hint? CurrentHint { get; private set; }
     public string? HintDisabled => CurrentHint is not null ? "disabled" : null;
+    public bool ShowGlitch { get; private set; }
     public bool ShowValue { get; private set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _ = Audio.PlayOnce("end-ex-speech");
+            if (await SecureStorage.Default.GetAsync("app_end_glitch") is not { Length: > 0 })
+            {
+                await SecureStorage.Default.SetAsync("app_end_glitch", "true");
+                await Task.Delay(5000);
+                ShowGlitch = true;
+                StateHasChanged();
+
+                await Audio.Speak("end-speech", "Tseard, je hebt nu alle benodigde informatie. Voor de zekerheid heb ik hulp voor je in de app verwerkt.", duration: 8000);
+            }
+            else
+            {
+                ShowGlitch = true;
+                StateHasChanged();
+            }
+        }
+    }
 
     public async Task Help()
     {
         if (!await Hints.HasGeneratedHint())
         {
-            await Audio.Speak("qpq-speech", "Voor wat hoort wat. Hulplijnen vereisen wederdiensten.", duration: 3000);
+            await Audio.Speak("qpq-speech", "Voor wat hoort wat. Hulplijnen vereisen wederdiensten.", duration: 5000);
         }
 
         ShowValue = false;

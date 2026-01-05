@@ -1,5 +1,6 @@
 ﻿@page "/scenarios"
 @attribute [Authorize]
+@inject AudioService Audio
 @inject NavigationManager Navigation
 @inject ScenarioService Scenario
 
@@ -59,6 +60,10 @@
         if (states.All(e => e.Value))
         {
             Navigation.NavigateTo("/end", replace: true);
+        }
+        else
+        {
+            await Audio.PlayOnce("scs-ex-speech");
         }
     }
 

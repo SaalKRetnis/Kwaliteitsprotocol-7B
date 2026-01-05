@@ -1,12 +1,21 @@
-﻿using System.Collections.Concurrent;
+﻿using NAudio.CoreAudioApi;
+using System.Collections.Concurrent;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 
 namespace Kwaliteitsprotocol_7B.Services;
 
+#pragma warning disable CA1822
 public sealed partial class AudioService
 {
     readonly ConcurrentDictionary<string, MediaPlayer> Players = new(StringComparer.OrdinalIgnoreCase);
+
+    public partial double GetMediaVolume()
+    {
+        using var deviceEnumerator = new MMDeviceEnumerator();
+        var device = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+        return device.AudioEndpointVolume.MasterVolumeLevelScalar;
+    }
 
     public async partial Task Play(string id, double volume, bool loop)
     {

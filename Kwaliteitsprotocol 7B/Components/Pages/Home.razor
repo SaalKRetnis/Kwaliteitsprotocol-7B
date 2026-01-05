@@ -1,5 +1,6 @@
 ﻿@page "/"
 @attribute [Authorize]
+@inject AudioService Audio
 @inject AppAuthenticationStateProvider Authentication
 @inject NavigationManager Navigation
 @inject ScenarioService Scenario
@@ -19,9 +20,16 @@
 
         <p class="footer-note">Alleen voor intern gebruik. Onbevoegde toegang verboden.</p>
     </section>
+
+    @if (ShowVolumeOverlay)
+    {
+        <VolumeCheckOverlay OnResult="OnVolumeCheckResult" />
+    }
 </div>
 
 @code {
+    public bool ShowVolumeOverlay { get; private set; } = false;
+
     protected override async Task OnInitializedAsync()
     {
         var states = await Scenario.GetScenarioCompletionStates();
@@ -40,5 +48,14 @@
     }
 
     public void StartTraining()
-        => Navigation.NavigateTo("/scenarios");
+        => ShowVolumeOverlay = true;
+
+    void OnVolumeCheckResult(bool ok)
+    {
+        ShowVolumeOverlay = false;
+        if (ok)
+        {
+            Navigation.NavigateTo("/scenarios");
+        }
+    }
 }
