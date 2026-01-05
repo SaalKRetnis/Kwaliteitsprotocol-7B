@@ -89,7 +89,7 @@
         CurrentPhase = ScenarioPhase.Question;
         StateHasChanged();
 
-        await Task.Delay(1000);
+        await Task.Delay(2500);
         await Glitch();
 
         CurrentPhase = ScenarioPhase.Question;
@@ -118,9 +118,10 @@
         CurrentPhase = ScenarioPhase.Glitch;
         StateHasChanged();
 
-        await Task.Delay(500);
-        _ = Audio.Speak("sc4-speech", "Dit… lijkt een foutmelding. De sensor registreert… geen bekende entiteit.", duration: 6000);
+        _ = Audio.Play("glitch");
+        await Task.Delay(100);
 
+        _ = Audio.Speak("sc4-speech", "Classificatie mislukt. Bewegingspatroon valt buiten alle bekende parameters.", duration: 6000);
         for (var i = 0; i < 6; i++)
         {
             TearClass = $"tear-{Random.Shared.Next(1, 6)}";

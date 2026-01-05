@@ -17,10 +17,10 @@
         </header>
 
         <article class="instructions">
-            <p>Tijdens de ronde registreert de niveausensor onverwachte beweging in Silo 3.</p>
-            <p>Geen personeel aanwezig.</p>
-            <p>Geen geplande activiteiten.</p>
-            <p>Log de gebeurtenis volgens procedure.</p>
+            <p>Tijdens de ronde registreert de niveausensor een korte afwijking in Silo 3.</p>
+            <p>Er is geen personeel aanwezig en er zijn geen geplande werkzaamheden.</p>
+            <p>Er worden geen aanvullende alarmen of drukveranderingen gemeld.</p>
+            <p>Noteer de gebeurtenis en vervolg de ronde volgens procedure.</p>
         </article>
 
         @if (CurrentPhase >= ScenarioPhase.Question)
@@ -87,7 +87,7 @@
         CurrentPhase = ScenarioPhase.Question;
         StateHasChanged();
 
-        await Task.Delay(1000);
+        await Task.Delay(2500);
         await Glitch();
 
         CurrentPhase = ScenarioPhase.Question;
@@ -116,9 +116,10 @@
         CurrentPhase = ScenarioPhase.Glitch;
         StateHasChanged();
 
-        await Task.Delay(500);
-        _ = Audio.Speak("sc2-speech", "Waarschijnlijk een drukschommeling. Geen actie vereist. Ga verder met de ronde.", duration: 5000);
+        _ = Audio.Play("glitch");
+        await Task.Delay(100);
 
+        _ = Audio.Speak("sc2-speech", "Afwijking komt overeen met eerdere patronen. Classificatie blijft niet‑kritiek.", duration: 5000);
         for (var i = 0; i < 6; i++)
         {
             TearClass = $"tear-{Random.Shared.Next(1, 6)}";

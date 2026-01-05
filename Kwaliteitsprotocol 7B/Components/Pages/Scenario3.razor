@@ -17,9 +17,9 @@
         </header>
 
         <article class="instructions">
+            <p>Beoordeel de drie rapporten die bij deze module zijn geleverd.</p>
             <p>Kies het rapport dat het best voldoet aan de richtlijnen van Kwaliteitsprotocol 7B.</p>
-            <p>Let op volledigheid, consistentie en correcte classificatie.</p>
-            <p>Sommige rapporten kunnen onvolledig of beperkt zichtbaar zijn.</p>
+            <p>Let op volledigheid, consistente terminologie en correcte classificatie.</p>
         </article>
 
         @if (CurrentPhase >= ScenarioPhase.Question)
@@ -88,7 +88,7 @@
         CurrentPhase = ScenarioPhase.Question;
         StateHasChanged();
 
-        await Task.Delay(1000);
+        await Task.Delay(2500);
         await Glitch();
 
         CurrentPhase = ScenarioPhase.Question;
@@ -117,9 +117,10 @@
         CurrentPhase = ScenarioPhase.Glitch;
         StateHasChanged();
 
-        await Task.Delay(500);
-        _ = Audio.Speak("sc3-speech", "Selecteer het rapport dat correct is ingevuld volgens protocol.", duration: 4000);
+        _ = Audio.Play("glitch");
+        await Task.Delay(100);
 
+        _ = Audio.Speak("sc3-speech", "Vergelijking uitgevoerd. Slechts één optie sluit aan bij het voortschrijdende patroon.", duration: 4000);
         for (var i = 0; i < 6; i++)
         {
             TearClass = $"tear-{Random.Shared.Next(1, 6)}";

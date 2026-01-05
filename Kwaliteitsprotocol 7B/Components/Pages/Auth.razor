@@ -1,17 +1,22 @@
 ﻿@page "/auth"
+@inject AudioService Audio
 @inject AppAuthenticationStateProvider Authentication
 @inject NavigationManager Navigation
 
 <div class="auth">
     <section class="auth-box card">
-        <h1>Kwaliteitsprotocol 7B – Toegang vereist</h1>
-        <p>Voer uw persoonlijke toegangscode in om de module te openen.</p>
-        
+        <header>
+            <h1>Kwaliteitsprotocol 7B</h1>
+            <h3>Toegang vereist</h3>
+        </header>
+
+        <p>Voer je persoonlijke toegangscode in om de module te openen.</p>
+
         <input class="auth-input" @bind="Input" />
 
         @if (InputIsValid is true)
         {
-            <p class="glitch">CLASSIFICATIE BEVESTIGD – MELK‑Δ17</p>
+            <p class="glitch">Toegangscode geverifieerd. Afwijkende autorisatie gedetecteerd.</p>
         }
         else if (InputIsValid is false)
         {
@@ -32,8 +37,11 @@
         InputIsValid = "2301".Equals(Input, StringComparison.OrdinalIgnoreCase);
         if (InputIsValid is true)
         {
+            _ = Audio.Play("glitch2");
+            await Task.Delay(100);
+
             await Authentication.UpdateAuthenticationState(new("2301", "Feenstra, Tseard"), rememberUser: true);
-            await Task.Delay(500);
+            await Task.Delay(1000);
 
             Navigation.NavigateTo("/", replace: true, forceLoad: true);
         }

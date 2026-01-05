@@ -18,8 +18,7 @@
 
         <article class="instructions">
             <p>Voer een visuele inspectie uit van de melkmonsters.</p>
-            <p>Let op afwijkingen in kleur, temperatuur en lichtreflectie.</p>
-            <p><strong>Monster #17</strong> toont een lichte UV‑afwijking. Noteer volgens protocol.</p>
+            <p>Let op afwijkingen in kleur, helderheid en temperatuur.</p>
         </article>
 
         @if (CurrentPhase >= ScenarioPhase.Question)
@@ -64,7 +63,7 @@
     public ScenarioPhase CurrentPhase { get; private set; } = ScenarioPhase.Idle;
     public string? ImageClass => CurrentPhase is ScenarioPhase.Glitch ? "active" : null;
     public string? TearClass { get; private set; }
-    public Question Question { get; } = new("Welke parameter wijkt het meest af van de standaardwaarden?",
+    public Question Question { get; } = new("Monster #17 toont een onregelmatigheid die niet direct zichtbaar is. Welke parameter wijkt het meest af van de standaardwaarden?",
     [
         new("<strong>A.</strong> Vetpercentage"),
         new("<strong>B.</strong> Temperatuur"),
@@ -85,7 +84,7 @@
         CurrentPhase = ScenarioPhase.Question;
         StateHasChanged();
 
-        await Task.Delay(1000);
+        await Task.Delay(2500);
         await Glitch();
 
         CurrentPhase = ScenarioPhase.Question;
@@ -114,9 +113,10 @@
         CurrentPhase = ScenarioPhase.Glitch;
         StateHasChanged();
 
-        await Task.Delay(500);
-        _ = Audio.Speak("sc1-speech", "Dit is een lichte variatie binnen de toegestane marges. Noteer afwijking als niet‑kritiek.", duration: 6000);
+        _ = Audio.Play("glitch");
+        await Task.Delay(100);
 
+        _ = Audio.Speak("sc1-speech", "Afwijking gedetecteerd buiten het zichtbare spectrum. Correlatie laag maar aanwezig.", duration: 6000);
         for (var i = 0; i < 6; i++)
         {
             TearClass = $"tear-{Random.Shared.Next(1, 6)}";
