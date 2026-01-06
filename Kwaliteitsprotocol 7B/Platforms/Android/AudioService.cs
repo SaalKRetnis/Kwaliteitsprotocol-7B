@@ -10,6 +10,7 @@ namespace Kwaliteitsprotocol_7B.Services;
 public sealed partial class AudioService
 {
     readonly ConcurrentDictionary<string, MediaPlayer> Players = new(StringComparer.OrdinalIgnoreCase);
+    readonly ConcurrentDictionary<MediaPlayer, double> Volumes = [];
 
     public partial double GetMediaVolume()
     {
@@ -19,7 +20,7 @@ public sealed partial class AudioService
         return currentVolume / (maxVolume * 1d);
     }
 
-    public async partial Task Play(string id, double volume, bool loop)
+    public async partial Task<IDisposable> Play(string id, double volume, bool loop)
     {
         try
         {
@@ -35,9 +36,22 @@ public sealed partial class AudioService
             });
 
             player.SetVolume((float)volume, (float)volume);
+            Volumes[player] = volume;
             player.SeekTo(0);
             player.Start();
         }
         catch { }
+
+        return Task.FromResult<IDisposable>(new Disposable(() => Stop(id)));
+    }
+
+    void Stop(string id)
+    {
+        if (Players.TryRemove(id, out var player))
+        {
+            player.Stop();
+            player.Release();
+            Volumes.TryRemove(player, out _);
+        }
     }
 }

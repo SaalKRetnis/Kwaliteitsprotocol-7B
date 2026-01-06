@@ -9,8 +9,8 @@ public sealed partial class AudioService(DialogService dialog)
         Play(id),
         Task.Delay(duration));
 
-    public partial Task Play(string id, double volume = 1, bool loop = false);
-    
+    public partial Task<IDisposable> Play(string id, double volume = 1, bool loop = false);
+
     public async Task PlayOnce(string id, double volume = 1, bool loop = false)
     {
         if (await SecureStorage.Default.GetAsync($"app_played_{id}") is not { Length: > 0 })

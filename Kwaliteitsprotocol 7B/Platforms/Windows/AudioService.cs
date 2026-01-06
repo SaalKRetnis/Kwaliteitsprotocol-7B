@@ -17,7 +17,7 @@ public sealed partial class AudioService
         return device.AudioEndpointVolume.MasterVolumeLevelScalar;
     }
 
-    public async partial Task Play(string id, double volume, bool loop)
+    public async partial Task<IDisposable> Play(string id, double volume, bool loop)
     {
         var stream = await FileSystem.OpenAppPackageFileAsync($"audio/{id}.mp3");
         var player = Players.GetOrAdd(id, _ => new()
@@ -29,5 +29,16 @@ public sealed partial class AudioService
         player.Position = TimeSpan.Zero;
         player.Volume = volume;
         player.Play();
+
+        return new Disposable(() => Stop(id));
+    }
+
+    void Stop(string id)
+    {
+        if (Players.TryRemove(id, out var player))
+        {
+            player.Pause();
+            player.Dispose();
+        }
     }
 }
