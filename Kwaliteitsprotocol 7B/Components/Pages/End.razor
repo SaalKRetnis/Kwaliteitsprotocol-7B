@@ -98,7 +98,7 @@
         var hint = CurrentHint = await Hints.GenerateRandomHint();
         StateHasChanged();
 
-        using (await Audio.Play("happy-music", volume: .25, loop: true))
+        using (await Audio.Play("happy-music", volume: .1, loop: true))
         {
             await Task.Delay(500);
             await Audio.Play(hint.Audio);
