@@ -101,6 +101,7 @@
         if (answer.IsCorrect)
         {
             CurrentPhase = ScenarioPhase.Results;
+            _ = Audio.Play("answer-correct", volume: .5);
 
             await Task.Delay(1000);
             CurrentPhase = ScenarioPhase.Completed;
@@ -109,6 +110,10 @@
             await Task.Delay(1000);
             await Scenario.MarkScenario(3, completed: true);
             await JS.InvokeVoidAsync("history.back");
+        }
+        else
+        {
+            await Audio.Play("answer-incorrect", volume: .5);
         }
     }
 

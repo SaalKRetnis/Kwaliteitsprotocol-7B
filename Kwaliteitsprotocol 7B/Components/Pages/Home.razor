@@ -47,8 +47,17 @@
         Navigation.NavigateTo("/", replace: true);
     }
 
-    public void StartTraining()
-        => ShowVolumeOverlay = true;
+    public async Task StartTraining()
+    {
+        if (await SecureStorage.GetAsync("app_checked_volume") is { Length: > 0 })
+        {
+            Navigation.NavigateTo("/scenarios");
+            return;
+        }
+
+        ShowVolumeOverlay = true;
+        await SecureStorage.SetAsync("app_checked_volume", "true");
+    }
 
     void OnVolumeCheckResult(bool ok)
     {

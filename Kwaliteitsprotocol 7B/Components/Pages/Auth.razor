@@ -16,7 +16,11 @@
 
         @if (InputIsValid is true)
         {
-            <p class="glitch">Toegangscode geverifieerd. Afwijkende autorisatie gedetecteerd.</p>
+            <p class="auth-valid">Toegangscode geverifieerd.</p>
+            @if (ShowGlitch)
+            {
+                <p class="glitch">[AFWIJKENDE AUTORISATIE GEDETECTEERD]</p>
+            }
         }
         else if (InputIsValid is false)
         {
@@ -29,6 +33,7 @@
 
 @code {
     bool? InputIsValid;
+    bool ShowGlitch;
 
     public string? Input { get; set; }
 
@@ -37,6 +42,12 @@
         InputIsValid = "2301".Equals(Input, StringComparison.OrdinalIgnoreCase);
         if (InputIsValid is true)
         {
+            _ = Audio.Play("answer-correct", volume: .5);
+            await Task.Delay(1000);
+
+            ShowGlitch = true;
+            StateHasChanged();
+
             _ = Audio.Play("glitch2");
             await Task.Delay(100);
 
@@ -44,6 +55,10 @@
             await Task.Delay(1000);
 
             Navigation.NavigateTo("/", replace: true, forceLoad: true);
+        }
+        else
+        {
+            await Audio.Play("answer-incorrect", volume: .5);
         }
     }
 }

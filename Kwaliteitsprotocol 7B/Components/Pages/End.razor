@@ -4,6 +4,7 @@
 @inject AppAuthenticationStateProvider Authentication
 @inject HintsService Hints
 @inject NavigationManager Navigation
+@implements IDisposable
 
 <div class="end">
     <section class="end-box card">
@@ -56,6 +57,8 @@
 </div>
 
 @code {
+    IDisposable? MusicSubscription;
+
     public Hint? CurrentHint { get; private set; }
     public string? HintDisabled => CurrentHint is not null ? "disabled" : null;
     public bool ShowGlitch { get; private set; }
@@ -98,20 +101,18 @@
         var hint = CurrentHint = await Hints.GenerateRandomHint();
         StateHasChanged();
 
-        using (await Audio.Play("happy-music", volume: .1, loop: true))
-        {
-            await Task.Delay(500);
-            await Audio.Play(hint.Audio);
+        MusicSubscription ??= await Audio.Play("happy-music", volume: .1, loop: true);
+        await Task.Delay(500);
+        await Audio.Play(hint.Audio);
 
-            await Task.Delay(5000);
-            ShowValue = true;
-            StateHasChanged();
+        await Task.Delay(5000);
+        ShowValue = true;
+        StateHasChanged();
 
-            await Task.Delay(3000);
-            CurrentHint = null;
-            ShowValue = false;
-            StateHasChanged();
-        }
+        await Task.Delay(3000);
+        CurrentHint = null;
+        ShowValue = false;
+        StateHasChanged();
     }
 
     public async Task LogOff()
@@ -121,4 +122,7 @@
 
         Navigation.NavigateTo("/", replace: true);
     }
+
+    public void Dispose()
+        => MusicSubscription?.Dispose();
 }

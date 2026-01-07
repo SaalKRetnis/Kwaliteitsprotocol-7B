@@ -122,6 +122,15 @@ h1:focus {
 }
 
 .glitch {
+    color: #b30000 !important;
+    font-weight: 700;
+    margin-top: 1rem;
+    letter-spacing: 1px;
+    font-family: monospace;
+    animation: flicker 1.2s infinite;
+}
+
+.auth-valid {
     color: var(--fn-color-primary-dark);
     font-weight: 700;
     margin-top: 1rem;
@@ -514,7 +523,7 @@ button.answer {
     position: fixed;
     top: 1.5rem;
     right: 1.5rem;
-    background-color: rgba(0,0,0,0.65);
+    background-color: rgba(0,0,0,0.1);
     color: #fff;
     padding: 0.6rem 1rem;
     border-radius: 0.5rem;
@@ -552,6 +561,7 @@ button.answer {
     letter-spacing: 0.5px;
     color: #fff;
     text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    opacity: .5;
     margin: 0;
     padding: 0;
 }
